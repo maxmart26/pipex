@@ -6,7 +6,7 @@
 /*   By: matorgue <warthog2603@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 17:44:07 by matorgue          #+#    #+#             */
-/*   Updated: 2024/01/08 06:14:19 by matorgue         ###   ########.fr       */
+/*   Updated: 2024/01/08 14:13:43 by matorgue         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,12 @@
 
 void	ft_child(t_data *data, char **av, char **envp)
 {
+	dup2(data->f1, STDIN_FILENO);
+	dup2(data->pipe_fd[1], STDOUT_FILENO);
+	close(data->f1);
+	close(data->f2);
+	close(data->pipe_fd[0]);
+	close(data->pipe_fd[1]);
 	if (get_path(data, envp, av, 2) == NULL)
 	{
 		ft_putstr_fd("pipex: command 1 not found \n", 2);
@@ -23,12 +29,6 @@ void	ft_child(t_data *data, char **av, char **envp)
 		close(data->pipe_fd[1]);
 		exit(0);
 	}
-	dup2(data->f1, STDIN_FILENO);
-	dup2(data->pipe_fd[1], STDOUT_FILENO);
-	close(data->f1);
-	close(data->f2);
-	close(data->pipe_fd[0]);
-	close(data->pipe_fd[1]);
 	exec(data, envp);
 }
 
@@ -46,6 +46,12 @@ void	exec(t_data *data, char **envp)
 
 void	ft_parent(t_data *data, char **av, char **envp)
 {
+	dup2(data->pipe_fd[0], STDIN_FILENO);
+	dup2(data->f2, STDOUT_FILENO);
+	close(data->f1);
+	close(data->f2);
+	close(data->pipe_fd[0]);
+	close(data->pipe_fd[1]);
 	if (get_path(data, envp, av, 3) == NULL)
 	{
 		ft_putstr_fd("pipex: command 2 not found \n", 2);
@@ -55,12 +61,6 @@ void	ft_parent(t_data *data, char **av, char **envp)
 		close(data->pipe_fd[1]);
 		exit(0);
 	}
-	dup2(data->pipe_fd[0], STDIN_FILENO);
-	dup2(data->f2, STDOUT_FILENO);
-	close(data->f1);
-	close(data->f2);
-	close(data->pipe_fd[0]);
-	close(data->pipe_fd[1]);
 	exec(data, envp);
 }
 

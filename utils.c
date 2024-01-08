@@ -6,7 +6,7 @@
 /*   By: matorgue <warthog2603@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/06 18:21:20 by matorgue          #+#    #+#             */
-/*   Updated: 2024/01/08 06:14:19 by matorgue         ###   ########.fr       */
+/*   Updated: 2024/01/08 14:11:39 by matorgue         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ char	*ft_path(char **envp)
 	int	i;
 
 	i = 0;
-	while (ft_strncmp(envp[i], "path=", 5))
+	while (ft_strncmp(envp[i], "PATH=", 5))
 		i++;
 	return (&envp[i][5]);
 }
