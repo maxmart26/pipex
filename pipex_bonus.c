@@ -6,21 +6,21 @@
 /*   By: matorgue <warthog2603@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/08 14:19:47 by matorgue          #+#    #+#             */
-/*   Updated: 2024/01/08 18:38:38 by matorgue         ###   ########.fr       */
+/*   Updated: 2024/01/11 00:04:11 by matorgue         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex_bonus.h"
 
-void	ft_child(t_data *data, char **av, char **envp)
+void	ft_child(t_data *data, char **av, char **envp, int i)
 {
 	dup2(data->fd_in, STDIN_FILENO);
 	dup2(data->fd_out, STDOUT_FILENO);
 	close(data->fd_in);
 	close(data->fd_out);
-	if (get_path(data, envp, av, 2) == NULL)
+	if (get_path(data, envp, av, i) == NULL)
 	{
-		ft_putstr_fd("pipex: command not found \n", 2);
+	//ft_putstr_fd("pipex: command not found child \n", 2);
 		close(data->fd_in);
 		close(data->fd_out);
 		exit(0);
@@ -44,9 +44,9 @@ void	ft_parent(t_data *data, char **av, char **envp)
 	dup2(data->fd_out, STDOUT_FILENO);
 	close(data->fd_in);
 	close(data->fd_out);
-	if (get_path(data, envp, av, 3) == NULL)
+	if (get_path(data, envp, av, data->ac - 2) == NULL)
 	{
-		ft_putstr_fd("pipex: command final not found \n", 2);
+		//ft_putstr_fd("pipex: command final not found ici parents \n", 2);
 		close(data->fd_in);
 		close(data->fd_out);
 		exit(0);
@@ -82,32 +82,97 @@ char	*get_path(t_data *data, char **envp, char **av, int j)
 
 void	main_2(char **av, char **envp, t_data *data, int (*pipe_fd)[2])
 {
-	while (data->i < data->ac - 4)
+	while (data->i < data->nb_pipe)
 	{
+		// printf("test avec %d et %d\n",data->i,data->j);
 		data->pid = fork();
 		if (data->pid < 0)
 			return ;
 		if (data->pid == 0)
 		{
+			//printf("la %d\n", data->i);
 			ft_close_useless(data, pipe_fd);
-			ft_child(data, av, envp);
+			ft_child(data, av, envp, data->i + data->j);
 			waitpid(0, NULL, 0);
 		}
 		data->i++;
 	}
+	// printf("la %d\n",data->i);
 	ft_close_useless(data, pipe_fd);
 	ft_parent(data, av, envp);
 }
+void	ft_here_doc_put_in(t_data *data, char **av)
+{
+	char	*ret;
 
+	while (1)
+	{
+		ft_putstr_fd("pipe heredoc>", 2);
+		ret = get_next_line(0);
+		if (ft_strncmp(ret, av[2], ft_strlen(av[2])) == 0)
+		{
+			free(ret);
+			return ;
+		}
+		ft_putstr_fd(ret, data->f1);
+		free(ret);
+	}
+}
+
+void	ft_here_doc(t_data *data, char **av, char **envp, int (*pipe_fd)[2])
+{
+	data->f1 = open(".here_doc", O_CREAT | O_RDWR | O_TRUNC, 0777);
+	if (data->f1 < 0)
+		return ;
+	data->f2 = open(av[data->ac - 1], O_CREAT | O_RDWR | O_TRUNC, 0777);
+	if (data->f2 < 0)
+		return ;
+	if (pipe(pipe_fd[0]) == -1)
+	{
+		close(data->f2);
+		close(data->f1);
+	}
+	ft_here_doc_put_in(data, av);
+	close(data->f1);
+	data->f1 = open(".here_doc", O_RDONLY);
+	main_2(av, envp, data, pipe_fd);
+	exit(EXIT_SUCCESS);
+}
 int	main(int ac, char **av, char **envp)
 {
 	t_data	data;
 	int		i;
-	int		pipe_fd[ac - 4][2];
+	int		pipe_fd[ac - 5][2];
 
 	i = 0;
 	data.i = 0;
+	data.j = 2;
 	data.ac = ac;
+	data.nb_pipe = ac - 4;
+	if (ft_strncmp("here_doc", av[1], 8) == 0)
+	{
+		data.nb_pipe = ac - 5;
+		data.j = 3;
+		while (data.nb_pipe > i)
+		{
+			if (pipe(pipe_fd[i]) == -1)
+			{
+				close(data.f1);
+				close(data.f2);
+				i--;
+				while (i >= 0)
+				{
+					close(pipe_fd[i][0]);
+					close(pipe_fd[i][1]);
+					i--;
+				}
+				return (-1);
+			}
+			i++;
+			// if fermer les pipes deja ouverte
+		}
+		ft_here_doc(&data, av, envp, pipe_fd);
+	}
 	if (ac < 5)
 		return (0);
 	data.f1 = open(av[1], O_RDONLY);
@@ -119,7 +184,7 @@ int	main(int ac, char **av, char **envp)
 		close(data.f1);
 		return (-1);
 	}
-	while(ac - 4 > i)
+	while (ac - 4 > i)
 	{
 		if (pipe(pipe_fd[i]) == -1)
 		{
@@ -135,11 +200,8 @@ int	main(int ac, char **av, char **envp)
 			return (-1);
 		}
 		i++;
-		//if fermer les pipes deja ouverte
+		// if fermer les pipes deja ouverte
 	}
 	main_2(av, envp, &data, pipe_fd);
 	return (0);
 }
-
-
-

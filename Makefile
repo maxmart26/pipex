@@ -5,7 +5,7 @@ OBJ_BONUS = pipex_bonus.c\
 			 utils_bonus.c\
 			 utils_bonus2.c
 CC = cc
-CFLAGS = -Werror -Wextra -Wall -g3
+CFLAGS = -Wall -Werror -Wextra -g3
 LIBFT = libft/libft.a
 SRCS = ${OBJ}
 SRCS_BONUS = ${OBJ_BONUS}

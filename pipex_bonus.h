@@ -15,8 +15,10 @@
 typedef struct s_data
 {
 	int		(*pipe_fd)[2];
+	int		nb_pipe;
 	int		ac;
 	int		i;
+	int		j;
 	int		fd_in;
 	int		fd_out;
 	char	*path_temp;
