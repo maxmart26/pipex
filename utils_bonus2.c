@@ -6,7 +6,7 @@
 /*   By: matorgue <warthog2603@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/08 17:39:20 by matorgue          #+#    #+#             */
-/*   Updated: 2024/01/15 18:22:03 by matorgue         ###   ########.fr       */
+/*   Updated: 2024/01/15 19:20:11 by matorgue         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 void	ft_only_one(t_data *data)
 {
+	ft_putstr_fd("only one\n",2);
 	data->fd_in = data->f1;
 	data->fd_out = data->f2;
 }

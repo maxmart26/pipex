@@ -6,7 +6,7 @@
 /*   By: matorgue <warthog2603@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/08 14:19:47 by matorgue          #+#    #+#             */
-/*   Updated: 2024/01/15 18:59:11 by matorgue         ###   ########.fr       */
+/*   Updated: 2024/01/15 21:45:27 by matorgue         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,29 +82,27 @@ char	*get_path(t_data *data, char **envp, char **av, int j)
 
 void	main_2(char **av, char **envp, t_data *data)
 {
-	int	k = 0;
-	while (data->i < data->nb_pipe)
+	int	k;
+
+	k = 0;
+	while (data->i < data->nb_pipe && data->nb_pipe != 1)
 	{
-		//printf("test avec %d et %d\n",data->i,data->j);
 		data->pid = fork();
 		if (data->pid < 0)
 			return ;
 		if (data->pid == 0)
 		{
-			//printf("la %d\n", data->i);
 			ft_close_useless(data);
 			ft_child(data, av, envp, data->i + data->j);
-
 		}
 		data->i++;
 		k++;
 	}
-	while(k > 1)
+	while (k > data->nb_pipe)
 	{
 		wait(0);
 		k--;
 	}
-	// printf("la %d\n",data->i);
 	ft_close_useless(data);
 	ft_parent(data, av, envp);
 }
@@ -116,7 +114,7 @@ void	ft_here_doc_put_in(t_data *data, char **av)
 	{
 		ft_putstr_fd("pipe heredoc>", 2);
 		ret = get_next_line(0);
-		if (ft_strncmp(ret, av[2], ft_strlen(av[2])) == 0)
+		if (ft_strncmp(ret, av[2], ft_strlen(av[2])) == 0 && ft_strlen(av[2]) == ft_strlen(ret) - 1)
 		{
 			free(ret);
 			return ;
@@ -128,7 +126,18 @@ void	ft_here_doc_put_in(t_data *data, char **av)
 
 void	ft_here_doc(t_data *data, char **av, char **envp)
 {
-	data->f1 = open(".here_doc", O_CREAT | O_RDWR | O_TRUNC, 0777);
+	int	i;
+
+	i = 0;
+	while (1)
+	{
+		if (access(ft_strjoin(".here_doc", ft_itoa(i)), F_OK) == -1)
+			break ;
+		else
+			i++;
+	}
+	data->f1 = open(ft_strjoin(".here_doc", ft_itoa(i)),
+			O_CREAT | O_RDWR | O_TRUNC, 0777);
 	if (data->f1 < 0)
 		return ;
 	data->f2 = open(av[data->ac - 1], O_CREAT | O_RDWR | O_TRUNC, 0777);
@@ -141,7 +150,7 @@ void	ft_here_doc(t_data *data, char **av, char **envp)
 	}
 	ft_here_doc_put_in(data, av);
 	close(data->f1);
-	data->f1 = open(".here_doc", O_RDONLY);
+	data->f1 = open(ft_strjoin(".here_doc", ft_itoa(i)), O_RDONLY);
 	main_2(av, envp, data);
 	exit(EXIT_SUCCESS);
 }
@@ -155,7 +164,7 @@ int	main(int ac, char **av, char **envp)
 	data.j = 2;
 	data.ac = ac;
 	data.nb_pipe = ac - 4;
-	if (ft_strncmp("here_doc", av[1], 8) == 0)
+	if (ft_strncmp("here_doc", av[1], 8) == 0 && ft_strlen(av[1]) == 8)
 	{
 		data.nb_pipe = ac - 5;
 		data.j = 3;
@@ -183,7 +192,7 @@ int	main(int ac, char **av, char **envp)
 		}
 		ft_here_doc(&data, av, envp);
 	}
-	if (ac < 6)
+	if (ac < 5)
 		return (0);
 	data.f1 = open(av[1], O_RDONLY);
 	if (data.f1 < 0)
