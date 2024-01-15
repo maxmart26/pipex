@@ -14,7 +14,7 @@
 
 typedef struct s_data
 {
-	int		(*pipe_fd)[2];
+	int		**pipe_fd;
 	int		nb_pipe;
 	int		ac;
 	int		i;
@@ -39,7 +39,7 @@ void	ft_free_tab(char **tab);
 void	exec(t_data *data, char **envp);
 void	ft_close(t_data *data,int i);
 char	*get_path(t_data *data,char **envp, char **av, int j);
-void	ft_close_useless(t_data *data, int (*pipe_fd)[2]);
+void	ft_close_useless(t_data *data);
 
 
 #endif
