@@ -1,70 +1,70 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pipex.c                                            :+:      :+:    :+:   */
+/*   pipex_bonus_solo.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: matorgue <warthog2603@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/05 17:44:07 by matorgue          #+#    #+#             */
-/*   Updated: 2024/01/16 16:03:42 by matorgue         ###   ########.fr       */
+/*   Created: 2024/01/16 15:35:05 by matorgue          #+#    #+#             */
+/*   Updated: 2024/01/16 15:52:35 by matorgue         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "pipex.h"
+#include "pipex_bonus.h"
 
-void	ft_child(t_data *data, char **av, char **envp)
+void	ft_child_for_1(t_data *data, char **av, char **envp, int i)
 {
 	dup2(data->f1, STDIN_FILENO);
-	dup2(data->pipe_fd[1], STDOUT_FILENO);
+	dup2(data->pipefd[1], STDOUT_FILENO);
 	close(data->f1);
 	close(data->f2);
-	close(data->pipe_fd[0]);
-	close(data->pipe_fd[1]);
-	if (get_path(data, envp, av, 2) == NULL)
+	close(data->pipefd[0]);
+	close(data->pipefd[1]);
+	if (get_path_for_1(data, envp, av, i) == NULL)
 	{
 		ft_putstr_fd("pipex: command 1 not found \n", 2);
 		close(data->f1);
 		close(data->f2);
-		close(data->pipe_fd[0]);
-		close(data->pipe_fd[1]);
+		close(data->pipefd[0]);
+		close(data->pipefd[1]);
 		exit(0);
 	}
-	exec(data, envp);
+	exec_for_1(data, envp);
 }
 
-void	exec(t_data *data, char **envp)
+void	exec_for_1(t_data *data, char **envp)
 {
 	execve(data->path_def, data->mycmdargs, envp);
 	ft_free_tab(data->mycmdargs);
 	close(data->f1);
 	close(data->f2);
-	close(data->pipe_fd[0]);
-	close(data->pipe_fd[1]);
+	close(data->pipefd[0]);
+	close(data->pipefd[1]);
 	ft_free_tab(data->path);
 	exit(0);
 }
 
-void	ft_parent(t_data *data, char **av, char **envp)
+void	ft_parent_for_1(t_data *data, char **av, char **envp)
 {
-	dup2(data->pipe_fd[0], STDIN_FILENO);
+	dup2(data->pipefd[0], STDIN_FILENO);
 	dup2(data->f2, STDOUT_FILENO);
 	close(data->f1);
 	close(data->f2);
-	close(data->pipe_fd[0]);
-	close(data->pipe_fd[1]);
-	if (get_path(data, envp, av, 3) == NULL)
+	close(data->pipefd[0]);
+	close(data->pipefd[1]);
+	if (get_path_for_1(data, envp, av, 3) == NULL)
 	{
 		ft_putstr_fd("pipex: command 2 not found \n", 2);
 		close(data->f1);
 		close(data->f2);
-		close(data->pipe_fd[0]);
-		close(data->pipe_fd[1]);
+		close(data->pipefd[0]);
+		close(data->pipefd[1]);
 		exit(0);
 	}
-	exec(data, envp);
+	exec_for_1(data, envp);
 }
 
-char	*get_path(t_data *data, char **envp, char **av, int j)
+char	*get_path_for_1(t_data *data, char **envp, char **av, int j)
 {
 	int	i;
 
@@ -88,33 +88,4 @@ char	*get_path(t_data *data, char **envp, char **av, int j)
 	ft_free_tab(data->mycmdargs);
 	ft_free_tab(data->path);
 	return (NULL);
-}
-
-int	main(int ac, char **av, char **envp)
-{
-	t_data	data;
-	int		i;
-
-	i = 0;
-	if (ac != 5)
-	{
-		ft_putstr_fd("pas assez ou trop d arguments\n", 2);
-		return (0);
-	}
-	data.f1 = open(av[1], O_RDONLY);
-	if (data.f1 < 0)
-	{
-		ft_putstr_fd("probleme avec le file 1\n", 2);
-		return (-1);
-	}
-	data.f2 = open(av[4], O_CREAT | O_RDWR | O_TRUNC, 0644);
-	if (data.f2 < 0)
-	{
-		ft_putstr_fd("probleme avec le file 2", 2);
-		return (-1);
-	}
-	if (pipe(data.pipe_fd) == -1)
-		return (-1);
-	main_pipex_2(av, envp, &data);
-	return (0);
 }

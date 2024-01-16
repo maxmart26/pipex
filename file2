@@ -1,8 +1,0 @@
-drwxr-xr-x 3 matorgue 2023_paris  4096 Jan  5 22:44 libft
--rw-r--r-- 1 matorgue 2023_paris  1750 Jan  5 22:50 main.c
-a1
-a1
--rw-r--r-- 1 matorgue 2023_paris  4064 Jan  5 22:50 main.o
--rw-r--r-- 1 matorgue 2023_paris   345 Jan  5 20:44 Makefile
--rwxr-xr-x 1 matorgue 2023_paris 17848 Jan  5 22:50 pipex
--rw-r--r-- 1 matorgue 2023_paris   250 Jan  5 22:11 pipex.h
